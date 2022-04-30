@@ -1,0 +1,60 @@
+---
+title: "20220430-pen_scraper-jsg"
+author: "Jared Garfinkel"
+date: "4/30/2022"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(httr)
+library(RSelenium)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+```{r}
+url = "https://goldspot.com/collections/fountain-pen"
+urli = "https://goldspot.com/collections/fountain-pen?page=2"
+```
+
+```{r}
+sess = session(url)
+table1 = sess %>% 
+  html_elements(".product-thumb-href") %>% 
+  html_attr("href") %>% 
+  as_tibble_col(column_name = "product_name") %>% 
+  mutate(product_name = str_replace(product_name, "/collections/fountain-pen/products/", ""),
+         product_name = str_replace_all(product_name, "-", " "),
+         product_name = str_to_title(product_name))
+class_list = sess %>% 
+  html_elements(".product-thumb-href, .product-thumb-label") %>% 
+  html_attr("class")
+output = vector(mode="list", length = 12)
+for (i in 1:length(class_list)[which(class_list == "product_thumb_href")]) {
+  output[[i]] = "href"
+}
+which(class_list, "product_thumb_href")
+class_list[[2*3]]
+  as_tibble_col(column_name = "class") %>% 
+  mutate(row_number = row_number()) %>% 
+  pivot_wider(names_from = class, values_from = row_number)
+  html_text2() %>% 
+  as_tibble_col(column_name = "percent_off") %>% 
+  mutate(row_id = row_number(),
+         percent_off = lead(percent_off))
+```
+
